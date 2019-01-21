@@ -354,10 +354,6 @@ genesis_register_sidebar( array(
 	'description' => __( 'This is a widget that goes on the front page.', 'genesis-sample-tbd' ),
 ) );
 
-// Moves Title and Description on Archive, Taxonomy, Category, Tag
-remove_action( 'genesis_before_loop', 'genesis_do_taxonomy_title_description', 15 );
-add_action( 'genesis_after_header', 'genesis_do_taxonomy_title_description' );
-
 // Enqueue Ionicons from ionicons.com
 add_action( 'wp_enqueue_scripts', 'sp_enqueue_ionicons' );
 function sp_enqueue_ionicons() {
@@ -385,3 +381,67 @@ function sk_google_tag_manager2() { ?>
 	height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 	<!-- End Google Tag Manager (noscript) -->
 <?php }
+
+// Add featured image on single post
+add_action( 'genesis_entry_content', 'themeprefix_featured_image', 1 );
+function themeprefix_featured_image() {
+	$image = genesis_get_image( array( // more options here -> genesis/lib/functions/image.php
+			'format'  => 'html',
+			'size'    => 'large',// add in your image size large, medium or thumbnail - for custom see the post
+			'context' => '',
+			'attr'    => array ( 'class' => 'aligncenter' ), // set a default WP image class
+		) );
+	if ( is_singular()) {
+		if ( $image ) {
+			printf( '<div class="featured-image-class">%s</div>', $image ); // wraps the featured image in a div with css class you can control
+		}
+	}
+}
+
+// Removes Title and Description on Paginated Archive, Taxonomy, Category, Tag Pages
+add_action( 'genesis_after_header', 'sk_taxonomy_title_description' );
+/**
+ * Remove Taxonomy Title and Description on paginated pages.
+ */
+function sk_taxonomy_title_description() {
+    global $wp_query;
+
+    $paged = ( get_query_var( 'paged' ) ) ? get_query_var( 'paged' ) : 1;
+
+    // if we are on the first page of pagination, abort.
+    if ( 1 == $paged )  {
+        return;
+    }
+
+    remove_action( 'genesis_after_header', 'genesis_do_taxonomy_title_description', 20 );
+}
+
+/**
+ * Get rid of tags on posts.
+ * https://ryanbenhase.com/remove-tags-categories-or-any-taxonomy/
+ */
+function ryanbenhase_unregister_tags() {
+    unregister_taxonomy_for_object_type( 'post_tag', 'post' );
+}
+add_action( 'init', 'ryanbenhase_unregister_tags' );
+
+/**
+ * Allow shortcodes in genesis archive intro text.
+ * @author Joshua David Nelson
+ * https://joshuadnelson.com/code/allow-shortcodes-genesis-archive-intro-text/
+ **/
+// Custom Post Type Archive Intro Text
+add_filter( 'genesis_cpt_archive_intro_text_output', 'do_shortcode' );
+// Author Archive Intro Text
+add_filter( 'genesis_author_intro_text_output', 'do_shortcode' );
+// Term Archive Intro Text
+add_filter( 'genesis_term_intro_text_output', 'do_shortcode' );
+
+// Funtion to replace cat pages with WP Pages
+// https://wordpress.stackexchange.com/questions/106042/force-wordpress-to-show-pages-instead-of-category
+function wpa_alter_cat_links( $termlink, $term, $taxonomy ){
+    if( 'category' != $taxonomy ) return $termlink;
+
+    return str_replace( '/category', '', $termlink );
+}
+add_filter( 'term_link', 'wpa_alter_cat_links', 10, 3 );

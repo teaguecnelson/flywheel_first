@@ -1,23 +1,19 @@
 .thrid-nav-menu {
-  height: 15px;
-  background-color: #F0CE5C;
-
-  @include breakpoint($medium) {
-    margin-top: 83px;
-    height: 45px;
-  }
-}
-
-#menu-3rd-menu {
   display: none;
-  text-align: center;
-  max-width: 1200px;
-  margin: 0 auto;
+  margin-top: 83px;
   height: 45px;
+  background-color: #F0CE5C;
 
   @include breakpoint($medium) {
     display: block;
   }
+}
+
+#menu-3rd-menu {
+  text-align: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 45px;
 }
 
 #menu-3rd-menu li {
@@ -34,10 +30,4 @@
   padding: 12px 16px;
   display: inline-block;
   text-transform: uppercase;
-}
-
-.hidden-dsktop {
-  @include breakpoint($medium) {
-    display: none !important;
-  }
 }
